@@ -19,7 +19,7 @@ fluid.defaults("fluid.lintAll.check", {
     invokers: {
         runChecks: {
             funcName: "fluid.lintAll.runChecks",
-            args: ["{that}", "{arguments}.0"] // checksToRun
+            args: ["{that}", "{arguments}.0", "{arguments}.1"] // checksToRun, changedFiles
         },
         checkImpl: {
             funcName: "fluid.notImplemented",
@@ -34,10 +34,11 @@ fluid.defaults("fluid.lintAll.check", {
  *
  * @param {Object} that - The `fluid.lintAll.check` component.
  * @param {Array<String>} [checksToRun] - An optional list of checks to run.  All checks are run if this is left out.
+ * @param {Array<String>} changedFiles - An array of paths to changed files, used to limit runs to uncommitted files.
  * @return {CheckResults|Promise<CheckResults>} - The results of the check, which can either be a value for synchronous checks, or a `fluid.promise`.
  *
  */
-fluid.lintAll.runChecks = function (that, checksToRun) {
+fluid.lintAll.runChecks = function (that, checksToRun, changedFiles) {
     if (that.options.config.enabled && (!checksToRun || checksToRun.includes(that.options.key))) {
         // Use fluid-glob to get the list of files.
         var filesToScan = fluid.glob.findFiles(that.options.rootPath, that.options.config.includes, that.options.config.excludes, that.options.minimatchOptions);
@@ -71,7 +72,12 @@ fluid.lintAll.runChecks = function (that, checksToRun) {
                     });
                 }
             }
+        }
 
+        if (changedFiles && changedFiles.length) {
+            filesToScan = filesToScan.filter(function (singlePath) {
+                return changedFiles.indexOf(singlePath) !== -1;
+            });
         }
 
         that.results.checked = filesToScan.length;

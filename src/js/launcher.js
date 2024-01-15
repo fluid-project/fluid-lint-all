@@ -24,6 +24,8 @@ function printUsageInstructions() {
         " ",
         "  - showCheckedFiles: Display the list of files checked in the final output.",
         " ",
+        "  - stagedOnly: Only check files that have been staged for commit.",
+        " ",
         "  - checks: A command-delimited list of checks to run.",
         " ",
         "    The following checks are supported:",

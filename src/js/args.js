@@ -26,7 +26,7 @@ fluid.registerNamespace("fluid.lintAll");
  */
 fluid.lintAll.parseArgs = function (processArgs) {
     var minimistOptions = minimist(processArgs.slice(2), {
-        boolean: ["showMergedConfig", "showHelp", "showCheckedFiles"],
+        boolean: ["showMergedConfig", "showHelp", "showCheckedFiles", "stagedOnly"],
         string: ["checks", "configFile"],
         alias: {
             "showHelp": ["h", "help"]
@@ -34,7 +34,7 @@ fluid.lintAll.parseArgs = function (processArgs) {
     });
 
     // Minimist only handles parsing and not validation, so we lightly validate the input here.
-    var supportedArgKeys = ["checks", "configFile", "showMergedConfig", "showHelp", "showCheckedFiles", "help", "h"];
+    var supportedArgKeys = ["checks", "configFile", "showMergedConfig", "stagedOnly", "showHelp", "showCheckedFiles", "help", "h"];
     var argsOptions = fluid.filterKeys(minimistOptions, supportedArgKeys);
     if (argsOptions.checks) {
         argsOptions.checks = argsOptions.checks.trim().replace(/^"(.+)"$/, "$1").split(/ *, */);

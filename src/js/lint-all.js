@@ -4,6 +4,7 @@ var fs = require("fs");
 var path = require("path");
 var process = require("process");
 var jsonlint = require("@prantlf/jsonlint");
+var child_process = require("child_process");
 
 require("json5/lib/register");
 
@@ -49,6 +50,7 @@ fluid.lintAll.runAllChecks = function (argsOptions) {
     }
 
     var checkRunner = fluid.lintAll.checkRunner({ userConfig: configFileOptions });
+
     return checkRunner.runAllChecks(argsOptions);
 };
 
@@ -408,8 +410,27 @@ fluid.lintAll.checkRunner.runAllChecks = function (that, argsOptions) {
         fluid.log(fluid.logLevel.WARN, "fluid-lint-all: Running all checks.");
     }
 
+    var stagedOnly = fluid.get(argsOptions, "stagedOnly");
+    var changedFiles = stagedOnly ? fluid.lintAll.getStagedFiles(that.options.config.rootPath) : [];
+
+    // This is checked in the integration tests, which cannot collect coverage data.
+    /* istanbul ignore if */
+    if (stagedOnly) {
+        fluid.log(fluid.logLevel.WARN, " (Scanning only files with uncommitted changes.)");
+    }
+
     fluid.log(fluid.logLevel.WARN, "======================================================");
     fluid.log(fluid.logLevel.WARN);
+
+    // This is checked in the integration tests, which cannot collect coverage data.
+    /* istanbul ignore if */
+    if (stagedOnly && !changedFiles.length) {
+        fluid.log(fluid.logLevel.WARN, "No files have been changed, skipping all checks...");
+        fluid.log(fluid.logLevel.WARN);
+
+        allChecksPromise.resolve();
+        return allChecksPromise;
+    }
 
     if (argsOptions.showMergedConfig) {
         var currentLogObjectRenderChars = fluid.logObjectRenderChars;
@@ -421,7 +442,7 @@ fluid.lintAll.checkRunner.runAllChecks = function (that, argsOptions) {
 
     fluid.visitComponentChildren(that, function (childComponent) {
         if (fluid.componentHasGrade(childComponent, "fluid.lintAll.check")) {
-            var checkPromise = childComponent.runChecks(checkArgs);
+            var checkPromise = childComponent.runChecks(checkArgs, changedFiles);
             checkPromises.push(checkPromise);
         }
     }, { flat: true });
@@ -455,4 +476,28 @@ fluid.lintAll.checkRunner.runAllChecks = function (that, argsOptions) {
         }
     }, allChecksPromise.reject); // TODO: Consider making this more forgiving.
     return allChecksPromise;
+};
+
+fluid.lintAll.getStagedFiles = function (pathToCheck) {
+    var changedFiles = [];
+    var sanitisedRootPath = fluid.glob.sanitisePath(pathToCheck);
+
+    try {
+        // https://stackoverflow.com/questions/33610682/git-list-of-staged-files
+        var output = child_process.execSync("git diff --cached --name-only ", {
+            cwd: pathToCheck,
+            encoding: "utf-8"
+        });
+
+        var filePaths = output.trimStart().split("\n");
+
+        fluid.each(filePaths.slice(0, -1), function (filePath) {
+            changedFiles.push(sanitisedRootPath + "/" + filePath);
+        });
+    }
+    catch (error) {
+        fluid.log(error.stderr || error);
+    }
+
+    return changedFiles;
 };

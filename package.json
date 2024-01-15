@@ -22,6 +22,7 @@
     },
     "homepage": "https://github.com/fluid-project/fluid-lint-all",
     "dependencies": {
+        "@prantlf/jsonlint": "11.7.0",
         "@textlint/markdown-to-ast": "13.3.1",
         "eslint": "8.53.0",
         "eslint-config-fluid": "2.1.1-dev.20231104T144458Z.5488e1c.GH-17",
@@ -31,7 +32,6 @@
         "infusion": "4.6.0",
         "js-yaml": "4.1.0",
         "json5": "2.2.3",
-        "@prantlf/jsonlint": "11.7.0",
         "lintspaces": "0.10.2",
         "markdownlint": "0.27.0",
         "markdownlint-config-fluid": "0.1.4",
@@ -41,6 +41,7 @@
         "stylelint-config-fluid": "0.2.1"
     },
     "devDependencies": {
+        "fs-extra": "^11.1.1",
         "node-jqunit": "1.1.9"
     }
 }
