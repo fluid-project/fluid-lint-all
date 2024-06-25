@@ -24,9 +24,9 @@
     "dependencies": {
         "@prantlf/jsonlint": "11.7.0",
         "@textlint/markdown-to-ast": "13.3.1",
-        "eslint": "8.53.0",
-        "eslint-config-fluid": "2.1.1-dev.20231104T144458Z.5488e1c.GH-17",
-        "eslint-plugin-jsdoc": "40.0.1",
+        "eslint": "8.57.0",
+        "eslint-config-fluid": "2.1.2",
+        "eslint-plugin-jsdoc": "48.4.0",
         "eslint-plugin-markdown": "1.0.2",
         "fluid-glob": "1.0.7",
         "infusion": "4.6.0",
